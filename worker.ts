@@ -10,10 +10,11 @@ import os from 'os';
 import path from "path";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { RunnableSequence } from "@langchain/core/runnables";
+import redis from "./lib/redis";
 
-const redisConnection = {
-    url: process.env.REDIS_URL || 'redis://localhost:6379'
-}
+// const redisConnection = {
+//     url: process.env.REDIS_URL || 'redis://localhost:6379'
+// }
 
 const headingKeywords = [
   "abstract",
@@ -85,14 +86,14 @@ const worker = new Worker("file-upload-queue",
 
             // console.log(content);
 
-            const res = await axios.post("https://paperfy-294bierqg-rebir88601-5303s-projects.vercel.app/api/saveoverview",
+            const res = await axios.post("http://localhost:3000/api/saveoverview",
                 {
                     paperId,
                     overview
                 }
             )
 
-            console.log(res);
+            console.log(res.data);
             
 
             const newDocs = docs.map(doc => {
@@ -126,8 +127,8 @@ const worker = new Worker("file-upload-queue",
             });
 
             const vectorStore = await QdrantVectorStore.fromDocuments(splitDocs, embeddings, {
-                url: process.env.QDRANT_URL || "http://localhost:6333",
-                apiKey: process.env.QDRANT_API_KEY,
+                url: "https://c1ced9de-55f4-4ece-9fb5-12d97bf51073.us-west-2-0.aws.cloud.qdrant.io",
+                apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.Qkz1tL1HMpcIgXkHc8WzP9jJZGd8xMdKt8VnpfecDKI",
                 collectionName: `pdf-${paperId}`,
             });
 
@@ -140,7 +141,7 @@ const worker = new Worker("file-upload-queue",
     },
     {
         concurrency: 100,
-        connection: redisConnection
+        connection: redis
     }
 )
 
