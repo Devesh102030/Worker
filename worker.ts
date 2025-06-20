@@ -127,6 +127,7 @@ const worker = new Worker("file-upload-queue",
 
             const vectorStore = await QdrantVectorStore.fromDocuments(splitDocs, embeddings, {
                 url: process.env.QDRANT_URL || "http://localhost:6333",
+                apiKey: process.env.QDRANT_API_KEY,
                 collectionName: `pdf-${paperId}`,
             });
 
